@@ -1,0 +1,38 @@
+# Local .terraform directories (provider binaries, module cache)
+**/.terraform/*
+
+# .tfstate files - never commit state, it can contain secrets
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude override files, used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore lock files for plan output
+*.tfplan
+tfplan
+
+# Ignore any .env files with local secrets
+.env
+.env.*
+
+# Ignore auto-generated documentation
+.terraform.lock.hcl.bak
+
+# Editor / OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
