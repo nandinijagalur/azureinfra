@@ -1,1 +1,96 @@
 
+name: Terraform Azure Landing Zone Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      environment:
+        description: "Select Terraform Environment"
+        required: true
+        type: choice
+        options:
+          - hub
+          - dev
+          - uat
+          - prod
+
+
+jobs:
+
+  terraform:
+
+    name: Terraform Deploy ${{ github.event.inputs.environment }}
+
+    runs-on: ubuntu-latest
+
+
+    environment:
+      name: ${{ github.event.inputs.environment }}
+
+
+    permissions:
+      contents: read
+
+
+    defaults:
+      run:
+        working-directory: environments/${{ github.event.inputs.environment }}
+
+
+    steps:
+
+    # Checkout code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+
+
+    # Terraform setup
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+
+
+    # Azure Login
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+
+
+    # Terraform Init
+    - name: Terraform Init
+      run: terraform init
+
+
+
+    # Terraform Format Check
+    - name: Terraform Format
+      run: terraform fmt -check -recursive
+
+
+
+    # Terraform Validate
+    - name: Terraform Validate
+      run: terraform validate
+
+
+
+    # Terraform Plan
+    - name: Terraform Plan
+      run: |
+        terraform plan \
+        -var-file="${{ github.event.inputs.environment }}.tfvars" \
+        -out=tfplan
+
+
+
+    # Terraform Apply
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve tfplan
